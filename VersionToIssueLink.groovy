@@ -16,12 +16,11 @@ log.setLevel(Level.DEBUG)
 
 def issueLinkManager = ComponentAccessor.getComponent(IssueLinkManager) 
 def versionManager = ComponentAccessor.getVersionManager()
-def issueManager = ComponentAccessor.getComponent(IssueManager.class)
 def currentUser = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
 def issueLinkTypeManager = ComponentAccessor.getComponent(IssueLinkTypeManager)
 def relatesLinkTypeName = "InFixVersion" 
 def relateLinkType = issueLinkTypeManager.getIssueLinkTypesByName(relatesLinkTypeName) 
-def linkedIssuesKeys = []
+def linkedIssuesNotInVersion = []
 
 Issue updatedIssue = event.getIssue()
 
@@ -30,12 +29,14 @@ List<IssueLink> allOutIssueLink = ComponentAccessor.getIssueLinkManager().getOut
 allOutIssueLink.each{
     if (it instanceof IssueLink) {
         if (it.getIssueLinkType().getId().compareTo((Long) relateLinkType[0].id) ){
-                    linkedIssuesKeys.add(it)
+                    linkedIssuesNotInVersion.add(it)
         }
     }
 }
 
-log.debug("linkedIssuesKeys" + linkedIssuesKeys)
+log.debug("linkedIssuesKeys" + linkedIssuesNotInVersion)
+
+ComponentAccessor.issueLinkManager.removeIssueLinks(updatedIssue, currentUser)
 
 Collection<Version> fixVersions = new ArrayList<Version>()
 fixVersions = updatedIssue.getFixVersions()
@@ -51,3 +52,8 @@ fixVersions.each {
 	}
 }
 
+linkedIssuesNotInVersion.each{
+    if (it instanceof IssueLink) {                 
+        issueLinkManager.createIssueLink((Long) updatedIssue.getId(), (Long) it.getDestinationId(), (Long) it.getLinkTypeId(), (Long) 1, currentUser)           
+    }
+}
