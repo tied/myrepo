@@ -18,7 +18,7 @@ def issueLinkManager = ComponentAccessor.getComponent(IssueLinkManager)
 def versionManager = ComponentAccessor.getVersionManager()
 def currentUser = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser()
 def issueLinkTypeManager = ComponentAccessor.getComponent(IssueLinkTypeManager)
-def relatesLinkTypeName = "InFixVersion" 
+def relatesLinkTypeName = "InFixVersion" //IMPORTANT required issue link in project
 def relateLinkType = issueLinkTypeManager.getIssueLinkTypesByName(relatesLinkTypeName) 
 def linkedIssuesNotInVersion = []
 
